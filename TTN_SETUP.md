@@ -259,6 +259,34 @@ function encodeDownlink(input) {
     errors: []
   };
 }
+
+function decodeDownlink(input) {
+  var data = {};
+
+  if (input.bytes.length > 0) {
+    var cmd = input.bytes[0];
+
+    if (cmd === 0x00) {
+      data.command = "OFF";
+      data.switch = 0;
+    } else if (cmd === 0x01) {
+      data.command = "ON";
+      data.switch = 1;
+    } else if (cmd === 0x02) {
+      data.command = "TOGGLE";
+      data.toggle = true;
+    } else {
+      data.command = "UNKNOWN";
+      data.raw = cmd;
+    }
+  }
+
+  return {
+    data: data,
+    warnings: [],
+    errors: []
+  };
+}
 ```
 
 4. Click **"Save"**
