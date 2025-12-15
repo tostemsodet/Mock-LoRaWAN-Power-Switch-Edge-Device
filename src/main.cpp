@@ -208,6 +208,37 @@ float getRandomFloat(float min, float max) {
 void setup() {
     Serial.begin(SERIAL_BAUD);
     Serial.println(F("Starting Mock LoRaWAN Power Switch"));
+    Serial.println();
+
+    // Display LoRaWAN keys
+    Serial.println(F("========================================"));
+    Serial.println(F("LoRaWAN ABP Credentials"));
+    Serial.println(F("========================================"));
+
+    Serial.print(F("DEVADDR:  0x"));
+    Serial.println(DEVADDR, HEX);
+
+    Serial.print(F("NWKSKEY:  "));
+    for (int i = 0; i < 16; i++) {
+        if (NWKSKEY[i] < 0x10) Serial.print(F("0"));
+        Serial.print(NWKSKEY[i], HEX);
+        if (i < 15) Serial.print(F(" "));
+    }
+    Serial.println();
+
+    Serial.print(F("APPSKEY:  "));
+    for (int i = 0; i < 16; i++) {
+        if (APPSKEY[i] < 0x10) Serial.print(F("0"));
+        Serial.print(APPSKEY[i], HEX);
+        if (i < 15) Serial.print(F(" "));
+    }
+    Serial.println();
+
+    Serial.println(F("========================================"));
+    Serial.println(F("Register these keys in TTN Console!"));
+    Serial.println(F("Also saved to: lorawan_keys.txt"));
+    Serial.println(F("========================================"));
+    Serial.println();
 
     // Initialize pins
     pinMode(LED_PIN, OUTPUT);

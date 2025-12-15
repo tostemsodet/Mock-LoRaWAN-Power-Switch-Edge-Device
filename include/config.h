@@ -4,20 +4,12 @@
 // ============================================================================
 // LoRaWAN Configuration
 // ============================================================================
-// IMPORTANT: Replace these with your keys from generate_keys.py
-// These are placeholder values and must be updated!
+// Keys are auto-generated during build process
+// See include/generated_keys.h (created automatically)
+// To regenerate keys: run 'pio run -t clean' then rebuild
 // ============================================================================
 
-// Device Address (4 bytes) - MSB format
-#define LORAWAN_DEVADDR 0x26011234
-
-// Network Session Key (16 bytes) - MSB format
-#define LORAWAN_NWKSKEY { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
-
-// Application Session Key (16 bytes) - MSB format
-#define LORAWAN_APPSKEY { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#include "generated_keys.h"
 
 // ============================================================================
 // Hardware Configuration
