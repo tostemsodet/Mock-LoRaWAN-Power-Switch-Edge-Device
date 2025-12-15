@@ -63,8 +63,8 @@
 #define LORA_CHANNEL_7  923000000  // 923.0 MHz
 
 // Data rate and TX power
-#define LORA_DR         DR_SF7     // Spreading Factor 7
-#define LORA_TX_POWER   14         // dBm
+#define LORA_DR         DR_SF10    // Spreading Factor 10 (maximum reliability)
+#define LORA_TX_POWER   14         // dBm (standard power, reduced from 20 to avoid overload at close range)
 
 // ============================================================================
 // Downlink Command Definitions

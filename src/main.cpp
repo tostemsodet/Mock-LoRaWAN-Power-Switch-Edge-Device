@@ -20,10 +20,12 @@ const lmic_pinmap lmic_pins = {
 
 // State variables
 bool switchState = false;
-bool lastButtonState = HIGH;
-unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay = DEBOUNCE_DELAY;
 static osjob_t sendjob;
+
+// Button debouncing variables
+bool buttonState = HIGH;        // Current stable button state
+bool lastReading = HIGH;        // Last raw button reading
+unsigned long debounceTime = 0; // Time of last button state change
 
 // Mock power readings
 float voltage = 0.0;
@@ -122,6 +124,14 @@ void onEvent (ev_t ev) {
             break;
         case EV_TXSTART:
             Serial.println(F("EV_TXSTART"));
+            Serial.print(F("TX Frequency: "));
+            Serial.println(LMIC.freq);
+            Serial.print(F("TX Power: "));
+            Serial.println(LMIC.txpow);
+            Serial.print(F("Data Rate: "));
+            Serial.println(LMIC.datarate);
+            Serial.print(F("Channel: "));
+            Serial.println(LMIC.txChnl);
             break;
         case EV_TXCANCELED:
             Serial.println(F("EV_TXCANCELED"));
@@ -143,7 +153,7 @@ void do_send(osjob_t* j){
     if (LMIC.opmode & OP_TXRXPEND) {
         Serial.println(F("OP_TXRXPEND, not sending"));
     } else {
-        // Generate random mock power values
+        // Generate random mock power values based on switch state
         if (switchState) {
             voltage = getRandomFloat(VOLTAGE_MIN, VOLTAGE_MAX);
             current = getRandomFloat(CURRENT_MIN, CURRENT_MAX);
@@ -182,23 +192,38 @@ void do_send(osjob_t* j){
 }
 
 void checkButton() {
-    int reading = digitalRead(BOOT_BTN);
+    bool reading = digitalRead(BOOT_BTN);
 
-    if (reading != lastButtonState) {
-        lastDebounceTime = millis();
+    // If reading changed, reset debounce timer
+    if (reading != lastReading) {
+        debounceTime = millis();
     }
 
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (reading == LOW) {  // Button pressed (active LOW)
-            switchState = !switchState;
-            digitalWrite(LED_PIN, switchState ? HIGH : LOW);
-            Serial.print(F("Button pressed! Switch state: "));
-            Serial.println(switchState ? "ON" : "OFF");
-            delay(300);  // Simple debounce delay
+    // If reading has been stable for debounce delay
+    if ((millis() - debounceTime) > DEBOUNCE_DELAY) {
+        // If the stable reading is different from current button state
+        if (reading != buttonState) {
+            buttonState = reading;
+
+            // Button just pressed (transition from HIGH to LOW)
+            if (buttonState == LOW) {
+                switchState = !switchState;
+                digitalWrite(LED_PIN, switchState ? HIGH : LOW);
+                Serial.print(F("Button pressed! Switch state: "));
+                Serial.println(switchState ? "ON" : "OFF");
+
+                // Send immediate update when switch state changes
+                if (!(LMIC.opmode & OP_TXRXPEND)) {
+                    Serial.println(F("Sending immediate state update..."));
+                    do_send(&sendjob);
+                } else {
+                    Serial.println(F("TX already pending, state will be sent in next scheduled transmission"));
+                }
+            }
         }
     }
 
-    lastButtonState = reading;
+    lastReading = reading;
 }
 
 float getRandomFloat(float min, float max) {
@@ -215,14 +240,13 @@ void setup() {
     Serial.println(F("LoRaWAN ABP Credentials"));
     Serial.println(F("========================================"));
 
-    Serial.print(F("DEVADDR:  0x"));
+    Serial.print(F("DEVADDR:  "));
     Serial.println(DEVADDR, HEX);
 
     Serial.print(F("NWKSKEY:  "));
     for (int i = 0; i < 16; i++) {
         if (NWKSKEY[i] < 0x10) Serial.print(F("0"));
         Serial.print(NWKSKEY[i], HEX);
-        if (i < 15) Serial.print(F(" "));
     }
     Serial.println();
 
@@ -230,7 +254,6 @@ void setup() {
     for (int i = 0; i < 16; i++) {
         if (APPSKEY[i] < 0x10) Serial.print(F("0"));
         Serial.print(APPSKEY[i], HEX);
-        if (i < 15) Serial.print(F(" "));
     }
     Serial.println();
 
