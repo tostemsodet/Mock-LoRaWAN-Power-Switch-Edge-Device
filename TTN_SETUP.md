@@ -243,19 +243,26 @@ To use JSON format instead of hex, configure a downlink encoder:
 ```javascript
 function encodeDownlink(input) {
   var bytes = [];
+  var warnings = [];
 
   if (input.data.switch !== undefined) {
-    // Switch command: 0 = OFF, 1 = ON
-    bytes.push(input.data.switch ? 0x01 : 0x00);
-  } else if (input.data.toggle) {
-    // Toggle command
-    bytes.push(0x02);
+    var cmd = input.data.switch.toString().toUpperCase();
+
+    if (cmd === "ON") {
+      bytes.push(0x01);
+    } else if (cmd === "OFF") {
+      bytes.push(0x00);
+    } else if (cmd === "TOGGLE") {
+      bytes.push(0x02);
+    } else {
+      warnings.push("Invalid switch value. Use: ON, OFF, or TOGGLE");
+    }
   }
 
   return {
     bytes: bytes,
     fPort: 1,
-    warnings: [],
+    warnings: warnings,
     errors: []
   };
 }
@@ -267,16 +274,13 @@ function decodeDownlink(input) {
     var cmd = input.bytes[0];
 
     if (cmd === 0x00) {
-      data.command = "OFF";
-      data.switch = 0;
+      data.switch = "OFF";
     } else if (cmd === 0x01) {
-      data.command = "ON";
-      data.switch = 1;
+      data.switch = "ON";
     } else if (cmd === 0x02) {
-      data.command = "TOGGLE";
-      data.toggle = true;
+      data.switch = "TOGGLE";
     } else {
-      data.command = "UNKNOWN";
+      data.switch = "UNKNOWN";
       data.raw = cmd;
     }
   }
@@ -298,9 +302,9 @@ function decodeDownlink(input) {
 2. Scroll to **"Messaging"** → **"Downlink"**
 3. Select **"JSON"** format
 4. Enter one of:
-   - `{"switch": 1}` to turn ON
-   - `{"switch": 0}` to turn OFF
-   - `{"toggle": true}` to toggle
+   - `{"switch": "ON"}` to turn ON
+   - `{"switch": "OFF"}` to turn OFF
+   - `{"switch": "TOGGLE"}` to toggle
 5. Click **"Schedule downlink"**
 
 **Without Encoder (Raw Hex):**

@@ -219,19 +219,26 @@ In TTN Console:
 ```javascript
 function encodeDownlink(input) {
   var bytes = [];
+  var warnings = [];
 
   if (input.data.switch !== undefined) {
-    // Switch command: 0 = OFF, 1 = ON
-    bytes.push(input.data.switch ? 0x01 : 0x00);
-  } else if (input.data.toggle) {
-    // Toggle command
-    bytes.push(0x02);
+    var cmd = input.data.switch.toString().toUpperCase();
+
+    if (cmd === "ON") {
+      bytes.push(0x01);
+    } else if (cmd === "OFF") {
+      bytes.push(0x00);
+    } else if (cmd === "TOGGLE") {
+      bytes.push(0x02);
+    } else {
+      warnings.push("Invalid switch value. Use: ON, OFF, or TOGGLE");
+    }
   }
 
   return {
     bytes: bytes,
     fPort: 1,
-    warnings: [],
+    warnings: warnings,
     errors: []
   };
 }
@@ -243,16 +250,13 @@ function decodeDownlink(input) {
     var cmd = input.bytes[0];
 
     if (cmd === 0x00) {
-      data.command = "OFF";
-      data.switch = 0;
+      data.switch = "OFF";
     } else if (cmd === 0x01) {
-      data.command = "ON";
-      data.switch = 1;
+      data.switch = "ON";
     } else if (cmd === 0x02) {
-      data.command = "TOGGLE";
-      data.toggle = true;
+      data.switch = "TOGGLE";
     } else {
-      data.command = "UNKNOWN";
+      data.switch = "UNKNOWN";
       data.raw = cmd;
     }
   }
@@ -270,7 +274,7 @@ function decodeDownlink(input) {
 **Turn switch ON:**
 ```json
 {
-  "switch": 1
+  "switch": "ON"
 }
 ```
 → Sends `01` on FPort 1
@@ -278,7 +282,7 @@ function decodeDownlink(input) {
 **Turn switch OFF:**
 ```json
 {
-  "switch": 0
+  "switch": "OFF"
 }
 ```
 → Sends `00` on FPort 1
@@ -286,7 +290,7 @@ function decodeDownlink(input) {
 **Toggle switch:**
 ```json
 {
-  "toggle": true
+  "switch": "TOGGLE"
 }
 ```
 → Sends `02` on FPort 1
@@ -297,7 +301,7 @@ function decodeDownlink(input) {
 2. Scroll to **"Messaging"** → **"Downlink"**
 3. **Instead of hex**, use **"JSON"** format and enter:
    ```json
-   {"switch": 1}
+   {"switch": "ON"}
    ```
 4. Click **"Schedule downlink"**
 
