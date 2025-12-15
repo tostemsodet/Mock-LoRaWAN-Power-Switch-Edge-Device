@@ -99,5 +99,5 @@ def generate_keys(source, target, env):
     print("=" * 70)
     print()
 
-# Register the pre-build script
-env.AddPreAction("buildprog", generate_keys)
+# Run the key generation directly
+generate_keys(None, None, env)
