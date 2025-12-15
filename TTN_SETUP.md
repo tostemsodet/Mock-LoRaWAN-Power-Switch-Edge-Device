@@ -223,22 +223,64 @@ pio device monitor
 
 ## Sending Downlink Commands
 
-You can remotely control the LED state via LoRaWAN downlink.
+You can remotely control the LED/switch state via LoRaWAN downlink.
 
 ### Downlink Command Format
 
 Send a single byte as payload (port 1):
-- `0x00` = Turn LED OFF
-- `0x01` = Turn LED ON
-- `0x02` = Toggle LED state
+- `0x00` = Turn switch OFF
+- `0x01` = Turn switch ON
+- `0x02` = Toggle switch state
+
+### Setup Downlink Encoder (Recommended)
+
+To use JSON format instead of hex, configure a downlink encoder:
+
+1. Go to your Application → **Payload formatters**
+2. Under **"Downlink formatter"**, select **"Custom JavaScript formatter"**
+3. Paste this code:
+
+```javascript
+function encodeDownlink(input) {
+  var bytes = [];
+
+  if (input.data.switch !== undefined) {
+    // Switch command: 0 = OFF, 1 = ON
+    bytes.push(input.data.switch ? 0x01 : 0x00);
+  } else if (input.data.toggle) {
+    // Toggle command
+    bytes.push(0x02);
+  }
+
+  return {
+    bytes: bytes,
+    fPort: 1,
+    warnings: [],
+    errors: []
+  };
+}
+```
+
+4. Click **"Save"**
 
 ### Send Downlink via TTN Console
 
+**With Downlink Encoder (JSON):**
+1. Go to your device page in TTN Console
+2. Scroll to **"Messaging"** → **"Downlink"**
+3. Select **"JSON"** format
+4. Enter one of:
+   - `{"switch": 1}` to turn ON
+   - `{"switch": 0}` to turn OFF
+   - `{"toggle": true}` to toggle
+5. Click **"Schedule downlink"**
+
+**Without Encoder (Raw Hex):**
 1. Go to your device page in TTN Console
 2. Scroll down to **"Downlink"** section
 3. Fill in:
    - **FPort**: `1`
-   - **Payload**: Enter hex value (e.g., `01` to turn LED on)
+   - **Payload**: Enter hex value (e.g., `01` to turn switch on)
    - **Confirmed**: Leave unchecked (or check for ACK)
 4. Click **"Send"**
 

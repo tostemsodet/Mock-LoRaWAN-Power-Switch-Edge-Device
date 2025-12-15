@@ -205,6 +205,76 @@ function decodeUplink(input) {
 }
 ```
 
+## Downlink Encoder (Send Commands)
+
+To send commands to the device using JSON instead of hex, use this downlink encoder in TTN Console:
+
+### JavaScript Downlink Encoder
+
+In TTN Console:
+1. Go to your Application → Payload formatters
+2. Under **"Downlink formatter"**, select **"Custom JavaScript formatter"**
+3. Paste this code:
+
+```javascript
+function encodeDownlink(input) {
+  var bytes = [];
+
+  if (input.data.switch !== undefined) {
+    // Switch command: 0 = OFF, 1 = ON
+    bytes.push(input.data.switch ? 0x01 : 0x00);
+  } else if (input.data.toggle) {
+    // Toggle command
+    bytes.push(0x02);
+  }
+
+  return {
+    bytes: bytes,
+    fPort: 1,
+    warnings: [],
+    errors: []
+  };
+}
+```
+
+### Usage Examples
+
+**Turn switch ON:**
+```json
+{
+  "switch": 1
+}
+```
+→ Sends `01` on FPort 1
+
+**Turn switch OFF:**
+```json
+{
+  "switch": 0
+}
+```
+→ Sends `00` on FPort 1
+
+**Toggle switch:**
+```json
+{
+  "toggle": true
+}
+```
+→ Sends `02` on FPort 1
+
+### Send Downlink via TTN Console
+
+1. Go to your device page in TTN Console
+2. Scroll to **"Messaging"** → **"Downlink"**
+3. **Instead of hex**, use **"JSON"** format and enter:
+   ```json
+   {"switch": 1}
+   ```
+4. Click **"Schedule downlink"**
+
+The encoder will automatically convert it to the correct hex byte!
+
 ### Raw Payload Example
 
 When switch is ON:
