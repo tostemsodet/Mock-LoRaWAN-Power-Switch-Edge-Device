@@ -289,27 +289,38 @@ function encodeDownlink(input) {
 }
 
 function decodeDownlink(input) {
-  var data = {};
+  var data = {
+    switch: "UNKNOWN"
+  };
+  var errors = [];
 
-  if (input.bytes.length > 0) {
-    var cmd = input.bytes[0];
+  if (!input || !input.bytes || input.bytes.length === 0) {
+    errors.push("No payload provided");
+    return {
+      data: data,
+      warnings: [],
+      errors: errors
+    };
+  }
 
-    if (cmd === 0x00) {
-      data.switch = "OFF";
-    } else if (cmd === 0x01) {
-      data.switch = "ON";
-    } else if (cmd === 0x02) {
-      data.switch = "TOGGLE";
-    } else {
-      data.switch = "UNKNOWN";
-      data.raw = cmd;
-    }
+  var cmd = input.bytes[0];
+
+  if (cmd === 0x00) {
+    data.switch = "OFF";
+  } else if (cmd === 0x01) {
+    data.switch = "ON";
+  } else if (cmd === 0x02) {
+    data.switch = "TOGGLE";
+  } else {
+    data.switch = "UNKNOWN";
+    data.raw = cmd;
+    errors.push("Unknown command: 0x" + cmd.toString(16));
   }
 
   return {
     data: data,
     warnings: [],
-    errors: []
+    errors: errors
   };
 }
 ```
