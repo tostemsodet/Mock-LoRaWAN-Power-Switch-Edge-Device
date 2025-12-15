@@ -209,14 +209,14 @@ function decodeUplink(input) {
 
 When switch is ON:
 ```
-01 00 01 02 02 5C 05 03 02 00 F7 04 02 16 AD
+01 00 01 02 02 5C 05 03 02 00 F7 04 02 E3 3A
 ```
 
 Breakdown:
 - `01 00 01` → Channel 1, Digital Output, Value 1 (ON)
 - `02 02 5C 05` → Channel 2, Analog Input, Value 23557 (235.57V)
 - `03 02 00 F7` → Channel 3, Analog Input, Value 247 (2.47A)
-- `04 02 16 AD` → Channel 4, Analog Input, Value 5805 (58.05W)
+- `04 02 E3 3A` → Channel 4, Analog Input, Value 58170 (581.70W = 235.57V × 2.47A)
 
 When switch is OFF:
 ```
