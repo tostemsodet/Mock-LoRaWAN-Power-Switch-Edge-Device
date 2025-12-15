@@ -7,3 +7,4 @@
 # LoRaWAN Security - DO NOT COMMIT KEYS
 lorawan_keys.txt
 include/generated_keys.h
+__pycache__/
