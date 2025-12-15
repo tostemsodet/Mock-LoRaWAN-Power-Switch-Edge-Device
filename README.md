@@ -72,9 +72,9 @@ Device sends data every 60 seconds (configurable in `include/config.h`):
 - Channel 3: Current (A)
 - Channel 4: Power (W)
 
-## CayenneLPP Payload
+## CayenneLPP Payload Format
 
-The device uses CayenneLPP encoding for easy integration with TTN and dashboards:
+**The device firmware uses CayenneLPP library** to encode sensor data before transmission:
 
 ```
 Channel 1: Digital Output (Switch State)
@@ -83,16 +83,24 @@ Channel 3: Analog Input (Current)
 Channel 4: Analog Input (Power)
 ```
 
-### TTN Payload Decoder
+CayenneLPP automatically formats the data into a standard binary format that's widely supported by LoRaWAN platforms.
 
-#### Option 1: Built-in Cayenne LPP (Recommended)
+---
 
-In TTN Console v3:
-1. Go to your Application → Payload formatters
-2. Select **"Cayenne LPP"** from the Formatter type dropdown
+## Uplink Payload Decoder (Choose One)
+
+You have **TWO options** for decoding uplink messages in The Things Stack:
+
+### ⭐ Option 1: Built-in Cayenne LPP (RECOMMENDED)
+
+**Use this if:** You're okay with standard field names like `digital_out_1`, `analog_in_2`
+
+**Setup:**
+1. Go to your Application → **Payload formatters**
+2. Select **"Cayenne LPP"** from the Uplink formatter dropdown
 3. Click **Save**
 
-The payload will be automatically decoded to:
+**Decoded output:**
 ```json
 {
   "digital_out_1": 1,
@@ -102,9 +110,17 @@ The payload will be automatically decoded to:
 }
 ```
 
-#### Option 2: Custom JavaScript Decoder
+✅ **No coding required!**
+✅ **Automatically maintained by TTN**
+✅ **Works out of the box**
 
-If you need custom field names, use this decoder:
+---
+
+### Option 2: Custom JavaScript Decoder (Optional)
+
+**Use this if:** You want custom field names like `switchState`, `voltage`, `current`, `power`
+
+**Setup:**
 
 ```javascript
 function decodeUplink(input) {
@@ -157,7 +173,7 @@ function decodeUplink(input) {
 }
 ```
 
-#### Option 3: Simple Decoder (Numeric Values Only)
+### Option 3: Simple Decoder (Numeric Values Only - Optional)
 
 For basic numeric output:
 
@@ -205,7 +221,11 @@ function decodeUplink(input) {
 }
 ```
 
+---
+
 ## Downlink Encoder (Send Commands)
+
+**Note:** This is separate from the uplink decoder above. The downlink encoder is for **sending commands** to the device.
 
 To send commands to the device using JSON instead of hex, use this downlink encoder in TTN Console:
 

@@ -113,17 +113,38 @@ After registration, you'll see the device overview page.
 
 5. Click **"Save"**
 
-### Step 4: Configure Payload Decoder (CayenneLPP)
+### Step 4: Configure Uplink Payload Decoder
 
-1. In your application page, click on **"Payload Formats"**
-2. Select **"Cayenne LPP"** from the dropdown
-3. Click **"Save payload functions"**
+**The device uses CayenneLPP library** to encode data. You have two options for decoding:
 
-This will automatically decode the data sent by your device:
-- Channel 1: Switch state (digital output)
-- Channel 2: Voltage (analog input)
-- Channel 3: Current (analog input)
-- Channel 4: Power (analog input)
+#### ⭐ Option A: Built-in Cayenne LPP (RECOMMENDED - Simplest!)
+
+1. In your application page, click on **"Payload formatters"**
+2. Under **"Uplink formatter"**, select **"Cayenne LPP"** from the dropdown
+3. Click **"Save"**
+
+✅ **That's it! No code needed.**
+
+**Decoded output:**
+```json
+{
+  "digital_out_1": 1,      // Switch state (0=OFF, 1=ON)
+  "analog_in_2": 235.3,    // Voltage (V)
+  "analog_in_3": 2.47,     // Current (A)
+  "analog_in_4": 581.2     // Power (W)
+}
+```
+
+#### Option B: Custom JavaScript Decoder (Optional - Custom Field Names)
+
+**Only use if** you want field names like `switchState` instead of `digital_out_1`.
+
+1. In your application page, click on **"Payload formatters"**
+2. Under **"Uplink formatter"**, select **"Custom JavaScript formatter"**
+3. Paste the decoder code from [README.md](README.md#option-2-custom-javascript-decoder)
+4. Click **"Save"**
+
+**Most users should use Option A (Built-in Cayenne LPP).**
 
 ---
 
